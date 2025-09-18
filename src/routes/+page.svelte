@@ -3,6 +3,8 @@
     import Grid from '$lib/components/Grid.svelte';
     import Box from '$lib/components/Box.svelte';
 
+    const grid_width = 40;
+
     let boxes = [
         { color: 'tomato', x: 0.5, y: 0.333 },
         { color: 'goldenrod', x: 0.333, y: 0.625 },
@@ -21,9 +23,9 @@
 <div>
     <div class="canvas">
         <Canvas layerEvents style="touch-action: none">
-            <Grid color="grey" />
+            <Grid {grid_width} color="grey" />
             {#each boxes as { color, x, y } (color)}
-                <Box {color} x_init={x} y_init={y} onclick={() => reorder(color)} />
+                <Box {color} {grid_width} x_init={x} y_init={y} onclick={() => reorder(color)} />
             {/each}
         </Canvas>
     </div>
