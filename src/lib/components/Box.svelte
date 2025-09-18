@@ -2,15 +2,13 @@
     import type { LayerEvent, Render } from 'svelte-canvas';
     import { Layer } from 'svelte-canvas';
 
-    let { x_init, y_init, grid_width, color, onclick } = $props();
+    let { x_curr = $bindable(), y_curr = $bindable(), grid_width, color, onclick } = $props();
 
     const width = grid_width;
     const height = grid_width * 2;
 
     let dragging = $state(false);
 
-    let x_curr = $state(0);
-    let y_curr = $state(0);
     let stroke = $state('black');
 
     function snapToGrid(val: number): number {
@@ -18,8 +16,8 @@
     }
 
     const setup: Render = ({ width, height }) => {
-        const x = width * x_init;
-        const y = height * y_init;
+        const x = width * x_curr;
+        const y = height * y_curr;
         x_curr = snapToGrid(x);
         y_curr = snapToGrid(y);
     };
