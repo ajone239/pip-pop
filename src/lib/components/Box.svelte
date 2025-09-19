@@ -2,24 +2,34 @@
     import type { LayerEvent, Render } from 'svelte-canvas';
     import { Layer } from 'svelte-canvas';
 
-    let { x_curr = $bindable(), y_curr = $bindable(), grid_width, color, onclick } = $props();
+    let {
+        x_curr = $bindable(),
+        y_curr = $bindable(),
+        xDotsCount,
+        yDotsCount,
+        color,
+        onclick
+    } = $props();
 
-    const width = grid_width;
-    const height = grid_width * 2;
+    let boxWidth: number;
+    let boxHeight: number;
 
     let dragging = $state(false);
 
     let stroke = $state('black');
 
-    function snapToGrid(val: number): number {
-        return Math.floor(val / grid_width) * grid_width + 4;
+    function snapToGrid(val: number, boxLength: number): number {
+        return Math.floor(val / boxLength) * boxLength;
     }
 
     const setup: Render = ({ width, height }) => {
+        boxWidth = (2 * width) / xDotsCount;
+        boxHeight = (4 * height) / yDotsCount;
+
         const x = width * x_curr;
         const y = height * y_curr;
-        x_curr = snapToGrid(x);
-        y_curr = snapToGrid(y);
+        x_curr = snapToGrid(x, boxWidth);
+        y_curr = snapToGrid(y, boxHeight);
     };
 
     const renderMain: Render = ({ context }) => {
@@ -27,12 +37,10 @@
         context.strokeStyle = stroke;
         context.lineWidth = 2;
         context.beginPath();
-        // subtract the width from the coords to center the mouse in the object
+        const x = x_curr;
+        const y = y_curr;
 
-        const x = x_curr - (dragging ? width / 2 : 0);
-        const y = y_curr - (dragging ? height / 2 : 0);
-
-        context.roundRect(x, y, width, height, 5);
+        context.roundRect(x, y, boxWidth, boxHeight, 5);
         context.fill();
         context.stroke();
     };
@@ -45,11 +53,11 @@
 
         context.beginPath();
 
-        const x = snapToGrid(x_curr);
-        const y = snapToGrid(y_curr);
+        // add the width from the coords back in
+        const x = snapToGrid(x_curr + boxWidth / 2, boxWidth);
+        const y = snapToGrid(y_curr + boxHeight / 2, boxHeight / 2);
 
-        // subtract the width from the coords to center the mouse in the object
-        context.roundRect(x, y, width, height, 5);
+        context.roundRect(x, y, boxWidth, boxHeight, 5);
         context.fill();
         context.stroke();
     };
@@ -77,8 +85,8 @@
     };
 
     const onUp = ({ x, y }: LayerEvent) => {
-        x_curr = snapToGrid(x);
-        y_curr = snapToGrid(y);
+        x_curr = snapToGrid(x, boxWidth);
+        y_curr = snapToGrid(y, boxHeight / 2);
 
         stroke = 'black';
         dragging = false;
@@ -86,8 +94,9 @@
 
     const onMove = ({ x, y }: LayerEvent) => {
         if (dragging) {
-            x_curr = x;
-            y_curr = y;
+            // subtract the width from the coords to center the mouse in the object
+            x_curr = x - boxWidth / 2;
+            y_curr = y - boxHeight / 2;
         }
     };
 </script>

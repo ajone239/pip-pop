@@ -3,7 +3,7 @@
     import Grid from '$lib/components/Grid.svelte';
     import Box from '$lib/components/Box.svelte';
 
-    const grid_width = 40;
+    const xDotsCount = 20;
 
     let boxes = $state([
         { color: 'tomato', x: 0.5, y: 0.333 },
@@ -20,7 +20,7 @@
         } else if (ys.every((y) => y == ys[0])) {
             return 'ys Match!';
         } else {
-            return 'Playing with the canvas lib';
+            return 'Playing with canvas';
         }
     });
 
@@ -34,7 +34,7 @@
         {#each boxes as { color, x, y } (color)}
             <li>
                 <p>
-                    <b>{color}</b>: {x}, {y}
+                    <b>{color}</b>: {Math.floor(x)}, {Math.floor(y)}
                 </p>
             </li>
         {:else}
@@ -44,13 +44,14 @@
 </div>
 
 <div>
-    <div class="canvas">
+    <div class="canvas noselect">
         <Canvas layerEvents style="touch-action: none">
-            <Grid {grid_width} color="grey" />
+            <Grid {xDotsCount} yDotsCount={xDotsCount} color="gray" />
             {#each boxes as box, i}
                 <Box
                     color={box.color}
-                    {grid_width}
+                    {xDotsCount}
+                    yDotsCount={xDotsCount}
                     bind:x_curr={boxes[i].x}
                     bind:y_curr={boxes[i].y}
                     onclick={() => {}}
@@ -62,7 +63,7 @@
 
 <style lang="scss">
     div {
-        margin: 20;
+        margin: 10;
         justify-self: center;
         border-radius: 0.5rem;
     }
@@ -73,5 +74,14 @@
         border-radius: 0.5rem;
         overflow: hidden;
         background-color: var(--bg2-color);
+    }
+    .noselect {
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+        user-select: none; /* Non-prefixed version, currently
+                                                                                                          supported by Chrome, Edge, Opera and Firefox */
     }
 </style>

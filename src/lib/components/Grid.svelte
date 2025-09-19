@@ -1,9 +1,9 @@
 <script lang="ts">
     import { Layer, type Render } from 'svelte-canvas';
 
-    const RADIUS = 3;
+    const RADIUS = 1;
 
-    let { color, grid_width } = $props();
+    let { color, xDotsCount, yDotsCount } = $props();
 
     function drawDot(context: CanvasRenderingContext2D, x: number, y: number) {
         context.lineWidth = 0;
@@ -14,12 +14,13 @@
     }
 
     const render: Render = ({ context, width, height }) => {
-        const x_offset = (width % grid_width) / 2;
-        const y_offset = (height % grid_width) / 2;
-        for (let i = 0; i < width; i += grid_width) {
-            for (let j = 0; j < height; j += grid_width) {
-                const i_o = i + x_offset;
-                const j_o = j + y_offset;
+        const widthBetweenDots = width / xDotsCount;
+        const heightBetweenDots = height / yDotsCount;
+
+        for (let i = 0; i < width; i += widthBetweenDots) {
+            for (let j = 0; j < height; j += heightBetweenDots) {
+                const i_o = i;
+                const j_o = j;
                 drawDot(context, i_o, j_o);
             }
         }
