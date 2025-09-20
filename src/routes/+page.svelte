@@ -24,12 +24,26 @@
         }
     });
 
+    function randColor(): string {
+        let chars = '0123456789ABCDEF';
+        let charsLen = chars.length;
+
+        let rv = '#';
+        for (var i = 0; i < 6; i++) {
+            rv += chars.charAt(Math.floor(Math.random() * charsLen));
+        }
+
+        console.log(rv);
+
+        return rv;
+    }
+
     const addNewBoxes = () => {
         boxes.push(
             ...[
-                { color: 'yellow', x: 0.2, y: 1.05 },
-                { color: 'blue', x: 0.45, y: 1.05 },
-                { color: 'red', x: 0.7, y: 1.05 }
+                { color: randColor(), x: 0.2, y: 1.05 },
+                { color: randColor(), x: 0.45, y: 1.05 },
+                { color: randColor(), x: 0.7, y: 1.05 }
             ]
         );
     };
