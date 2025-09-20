@@ -6,9 +6,9 @@
     const xDotsCount = 20;
 
     let boxes = $state([
-        { color: 'tomato', x: 0.5, y: 0.333 },
-        { color: 'goldenrod', x: 0.333, y: 0.625 },
-        { color: 'turquoise', x: 0.667, y: 0.625 }
+        { color: 'goldenrod', x: 0.2, y: 1.05 },
+        { color: 'tomato', x: 0.45, y: 1.05 },
+        { color: 'turquoise', x: 0.7, y: 1.05 }
     ]);
 
     let header = $derived.by(() => {
@@ -23,6 +23,16 @@
             return 'Playing with canvas';
         }
     });
+
+    const addNewBoxes = () => {
+        boxes.push(
+            ...[
+                { color: 'yellow', x: 0.2, y: 1.05 },
+                { color: 'blue', x: 0.45, y: 1.05 },
+                { color: 'red', x: 0.7, y: 1.05 }
+            ]
+        );
+    };
 
     $inspect(boxes);
 </script>
@@ -41,12 +51,18 @@
             <li><p>Sry no boxes</p></li>
         {/each}
     </ul>
+    <button
+        class="rounded-sm border-2 border-black bg-teal-200 p-2 text-black hover:bg-teal-300"
+        onclick={addNewBoxes}
+    >
+        Add new boxes
+    </button>
 </div>
 
-<div>
-    <div class="canvas noselect">
+<div class="no-select">
+    <div class="canvas">
         <Canvas layerEvents style="touch-action: none">
-            <Grid {xDotsCount} yDotsCount={xDotsCount} color="gray" />
+            <Grid {xDotsCount} yDotsCount={xDotsCount} bgColor="#555" color="gray" />
             {#each boxes as box, i}
                 <Box
                     color={box.color}
@@ -63,19 +79,20 @@
 
 <style lang="scss">
     div {
-        margin: 10;
         justify-self: center;
         border-radius: 0.5rem;
     }
     .canvas {
-        width: 100%;
-        aspect-ratio: 1;
+        width: 97%;
+        aspect-ratio: 0.75;
         justify-self: center;
         border-radius: 0.5rem;
+        border-style: solid;
+        border-width: 3px;
+        border-color: var(--main-border-color);
         overflow: hidden;
-        background-color: var(--bg2-color);
     }
-    .noselect {
+    .no-select {
         -webkit-touch-callout: none; /* iOS Safari */
         -webkit-user-select: none; /* Safari */
         -khtml-user-select: none; /* Konqueror HTML */

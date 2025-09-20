@@ -11,25 +11,28 @@
         onclick
     } = $props();
 
+    let gridWidth: number;
     let boxWidth: number;
     let boxHeight: number;
+    let x_last: number;
+    let y_last: number;
 
     let dragging = $state(false);
+    let inside = $state(false);
 
-    let stroke = $state('black');
+    let stroke = $derived(dragging ? 'white' : inside ? 'grey' : 'black');
 
     function snapToGrid(val: number, boxLength: number): number {
         return Math.floor(val / boxLength) * boxLength;
     }
 
-    const setup: Render = ({ width, height }) => {
+    const setup: Render = ({ width }) => {
+        gridWidth = width;
         boxWidth = (2 * width) / xDotsCount;
-        boxHeight = (4 * height) / yDotsCount;
+        boxHeight = (4 * width) / yDotsCount;
 
-        const x = width * x_curr;
-        const y = height * y_curr;
-        x_curr = snapToGrid(x, boxWidth);
-        y_curr = snapToGrid(y, boxHeight);
+        x_curr = width * x_curr;
+        y_curr = width * y_curr;
     };
 
     const renderMain: Render = ({ context }) => {
@@ -46,17 +49,16 @@
     };
 
     const renderShadow: Render = ({ context }) => {
-        if (!dragging) return;
+        if (!dragging || x_curr > gridWidth || y_curr + boxHeight > gridWidth) return;
 
         context.fillStyle = 'gray';
         context.strokeStyle = 'transparent';
 
-        context.beginPath();
-
         // add the width from the coords back in
-        const x = snapToGrid(x_curr + boxWidth / 2, boxWidth);
-        const y = snapToGrid(y_curr + boxHeight / 2, boxHeight / 2);
+        const x = snapToGrid(x_curr + boxWidth / 2, boxWidth / 2);
+        const y = snapToGrid(y_curr + boxHeight / 2, boxHeight / 4);
 
+        context.beginPath();
         context.roundRect(x, y, boxWidth, boxHeight, 5);
         context.fill();
         context.stroke();
@@ -69,26 +71,31 @@
 
     const onEnter = () => {
         document.body.style.cursor = 'pointer';
-        stroke = 'grey';
+        inside = true;
     };
 
     const onLeave = () => {
         document.body.style.cursor = 'auto';
         dragging = false;
-        stroke = 'black';
+        inside = false;
     };
 
     const onDown = () => {
         dragging = true;
-        stroke = 'white';
+        x_last = x_curr;
+        y_last = y_curr;
         onclick?.();
     };
 
     const onUp = ({ x, y }: LayerEvent) => {
-        x_curr = snapToGrid(x, boxWidth);
-        y_curr = snapToGrid(y, boxHeight / 2);
+        if (x > gridWidth || y + boxHeight > gridWidth) {
+            x_curr = x_last;
+            y_curr = y_last;
+        } else {
+            x_curr = snapToGrid(x, boxWidth / 2);
+            y_curr = snapToGrid(y, boxHeight / 4);
+        }
 
-        stroke = 'black';
         dragging = false;
     };
 
