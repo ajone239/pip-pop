@@ -53,26 +53,6 @@
 
 <h1 class="content-around text-3xl">{header}</h1>
 
-<div>
-    <ul>
-        {#each boxes as { color, x, y } (color)}
-            <li>
-                <p>
-                    <b>{color}</b>: {Math.floor(x)}, {Math.floor(y)}
-                </p>
-            </li>
-        {:else}
-            <li><p>Sry no boxes</p></li>
-        {/each}
-    </ul>
-    <button
-        class="rounded-sm border-2 border-black bg-teal-200 p-2 text-black hover:bg-teal-300"
-        onclick={addNewBoxes}
-    >
-        Add new boxes
-    </button>
-</div>
-
 <div class="no-select">
     <div class="canvas">
         <Canvas layerEvents style="touch-action: none">
