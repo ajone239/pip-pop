@@ -2,6 +2,8 @@
     import type { LayerEvent, Render } from 'svelte-canvas';
     import { Layer } from 'svelte-canvas';
 
+    const TAP_TIME = 500;
+
     let {
         x_curr = $bindable(),
         y_curr = $bindable(),
@@ -16,6 +18,8 @@
     let boxHeight: number;
     let x_last: number;
     let y_last: number;
+    let downTime = new Date().getTime();
+    let rotation = 0;
 
     let dragging = $state(false);
     let inside = $state(false);
@@ -36,6 +40,8 @@
     };
 
     const renderMain: Render = ({ context }) => {
+        context.save();
+
         context.fillStyle = color;
         context.strokeStyle = stroke;
         context.lineWidth = 2;
@@ -43,9 +49,14 @@
         const x = x_curr;
         const y = y_curr;
 
-        context.roundRect(x, y, boxWidth, boxHeight, 5);
+        context.translate(x, y);
+        context.rotate((rotation * Math.PI) / 2);
+
+        context.roundRect(0, 0, boxWidth, boxHeight, 5);
         context.fill();
         context.stroke();
+
+        context.restore();
     };
 
     const renderShadow: Render = ({ context }) => {
@@ -85,6 +96,8 @@
         x_last = x_curr;
         y_last = y_curr;
         onclick?.();
+
+        downTime = new Date().getTime();
     };
 
     const onUp = ({ x, y }: LayerEvent) => {
@@ -94,6 +107,11 @@
         } else {
             x_curr = snapToGrid(x, boxWidth / 2);
             y_curr = snapToGrid(y, boxHeight / 4);
+        }
+
+        const upTime = new Date().getTime();
+        if (upTime - downTime < TAP_TIME) {
+            rotation += 1;
         }
 
         dragging = false;
