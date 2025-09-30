@@ -85,16 +85,23 @@
     const renderShadow: Render = ({ context }) => {
         if (!dragging || x_curr > gridWidth || y_curr + boxHeight > gridWidth) return;
 
+        context.save();
+
         context.fillStyle = 'gray';
         context.strokeStyle = 'transparent';
 
         const x = snapToGrid(x_curr, boxWidth / 2);
         const y = snapToGrid(y_curr, boxHeight / 4);
 
+        context.translate(x + boxWidth / 2, y + boxHeight / 2);
+        context.rotate((rotation * Math.PI) / 2);
+
         context.beginPath();
-        context.roundRect(x, y, boxWidth, boxHeight, 5);
+        context.roundRect((-1 * boxWidth) / 2, (-1 * boxHeight) / 2, boxWidth, boxHeight, 5);
         context.fill();
         context.stroke();
+
+        context.restore();
     };
 
     const render: Render = (props) => {
