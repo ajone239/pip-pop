@@ -2,7 +2,8 @@
     import type { LayerEvent, Render } from 'svelte-canvas';
     import { Layer } from 'svelte-canvas';
 
-    const TAP_TIME = 500;
+    const TAP_TIME = 200;
+    const COOLDOWN_TIME = 250;
 
     let {
         x_curr = $bindable(),
@@ -18,13 +19,18 @@
     let boxHeight: number;
     let x_last: number;
     let y_last: number;
+    let debounce = true;
     let downTime = new Date().getTime();
     let rotation = 0;
 
+    let startedDragging = $state(false);
     let dragging = $state(false);
     let inside = $state(false);
 
-    let stroke = $derived(dragging ? 'white' : inside ? 'grey' : 'black');
+    // TODO(austin.jones): the `startDragging` color is for debug take it out
+    let stroke = $derived(
+        startedDragging ? 'green' : dragging ? 'white' : inside ? 'grey' : 'black'
+    );
 
     function snapToGrid(val: number, boxLength: number): number {
         return Math.floor(val / boxLength) * boxLength;
@@ -46,15 +52,32 @@
         context.strokeStyle = stroke;
         context.lineWidth = 2;
         context.beginPath();
-        const x = x_curr;
-        const y = y_curr;
 
-        context.translate(x, y);
+        const x = x_curr - (startedDragging ? boxWidth / 2 : 0);
+        const y = y_curr - (startedDragging ? boxHeight / 2 : 0);
+
+        context.translate(x + boxWidth / 2, y + boxHeight / 2);
         context.rotate((rotation * Math.PI) / 2);
 
-        context.roundRect(0, 0, boxWidth, boxHeight, 5);
+        context.roundRect((-1 * boxWidth) / 2, (-1 * boxHeight) / 2, boxWidth, boxHeight, 5);
+
         context.fill();
         context.stroke();
+
+        context.fillStyle = 'black';
+
+        context.beginPath();
+        context.rect(
+            (-1 * boxWidth) / 3,
+            (-1 * boxHeight) / 64,
+            (boxWidth * 2) / 3,
+            boxHeight / 32
+        );
+        context.fill();
+
+        context.beginPath();
+        context.arc(0, (-1 * boxHeight) / 4, boxWidth / 10, 0, Math.PI * 2);
+        context.fill();
 
         context.restore();
     };
@@ -65,9 +88,8 @@
         context.fillStyle = 'gray';
         context.strokeStyle = 'transparent';
 
-        // add the width from the coords back in
-        const x = snapToGrid(x_curr + boxWidth / 2, boxWidth / 2);
-        const y = snapToGrid(y_curr + boxHeight / 2, boxHeight / 4);
+        const x = snapToGrid(x_curr, boxWidth / 2);
+        const y = snapToGrid(y_curr, boxHeight / 4);
 
         context.beginPath();
         context.roundRect(x, y, boxWidth, boxHeight, 5);
@@ -78,6 +100,11 @@
     const render: Render = (props) => {
         renderShadow(props);
         renderMain(props);
+
+        const upTime = new Date().getTime();
+        if (upTime - downTime > COOLDOWN_TIME) {
+            debounce = true;
+        }
     };
 
     const onEnter = () => {
@@ -97,7 +124,9 @@
         y_last = y_curr;
         onclick?.();
 
-        downTime = new Date().getTime();
+        if (debounce) {
+            downTime = new Date().getTime();
+        }
     };
 
     const onUp = ({ x, y }: LayerEvent) => {
@@ -110,18 +139,20 @@
         }
 
         const upTime = new Date().getTime();
-        if (upTime - downTime < TAP_TIME) {
+        if (upTime - downTime < TAP_TIME && debounce && !startedDragging) {
             rotation += 1;
+            debounce = false;
         }
 
         dragging = false;
+        startedDragging = false;
     };
 
     const onMove = ({ x, y }: LayerEvent) => {
         if (dragging) {
-            // subtract the width from the coords to center the mouse in the object
-            x_curr = x - boxWidth / 2;
-            y_curr = y - boxHeight / 2;
+            startedDragging = true;
+            x_curr = x;
+            y_curr = y;
         }
     };
 </script>

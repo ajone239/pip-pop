@@ -23,32 +23,6 @@
             return 'Playing with canvas';
         }
     });
-
-    function randColor(): string {
-        let chars = '0123456789ABCDEF';
-        let charsLen = chars.length;
-
-        let rv = '#';
-        for (var i = 0; i < 6; i++) {
-            rv += chars.charAt(Math.floor(Math.random() * charsLen));
-        }
-
-        console.log(rv);
-
-        return rv;
-    }
-
-    const addNewBoxes = () => {
-        boxes.push(
-            ...[
-                { color: randColor(), x: 0.2, y: 1.05 },
-                { color: randColor(), x: 0.45, y: 1.05 },
-                { color: randColor(), x: 0.7, y: 1.05 }
-            ]
-        );
-    };
-
-    $inspect(boxes);
 </script>
 
 <h1 class="content-around text-3xl">{header}</h1>
